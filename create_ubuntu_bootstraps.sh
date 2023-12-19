@@ -148,7 +148,7 @@ cd ../ && rm -r build && mkdir build && cd build
 ../vkd3d/configure && make -j$(nproc) && make install
 cd ../ && rm -r build && mkdir build && cd build
 ../libpcap-${libpcap_version}/configure && make -j$(nproc) install
-cd ../
+cd ../libxkbcommon-${libxkbcommon_version}
 meson setup build -Denable-docs=false
 meson compile -C build
 meson install -C build
