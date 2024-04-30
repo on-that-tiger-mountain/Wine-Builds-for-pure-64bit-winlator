@@ -78,7 +78,7 @@ export DO_NOT_COMPILE="false"
 # Make sure that ccache is installed before enabling this.
 export USE_CCACHE="false"
 
-export WINE_BUILD_OPTIONS="--without-ldap --without-oss --disable-winemenubuilder --disable-tests"
+export WINE_BUILD_OPTIONS="--disable-winemenubuilder"
 
 # A temporary directory where the Wine source code will be stored.
 # Do not set this variable to an existing non-empty directory!
