@@ -1,4 +1,4 @@
-name: Wine-32on64-WoW64 CI
+name: Wine9.6-32on64-WoW64 CI
 
 on:
   schedule:
@@ -31,5 +31,5 @@ jobs:
           sha256sum *.tar.xz
       - uses: actions/upload-artifact@v3
         with:
-          name: Wine-32on64-WoW64
+          name: Wine9.6-32on64-WoW64
           path: ./*.tar.xz
