@@ -1,4 +1,4 @@
-name: Wine9.6-32on64-WoW64 CI
+name: wine9.7-exp-wow64 CI
 
 on:
   schedule:
@@ -24,11 +24,9 @@ jobs:
           sudo apt install debootstrap perl git wget xz-utils bubblewrap autoconf
           sudo tar -C /opt -xpf /opt/Bootstraps/bootstraps.tar.xz
           chmod +x build_wine.sh
-          export WINE_VERSION="9.1"
-          export EXPERIMENTAL_WOW64="true"
-          WINE_BRANCH=vanilla ./build_wine.sh
+          ./build_wine.sh
           sha256sum *.tar.xz
       - uses: actions/upload-artifact@v3
         with:
-          name: Wine9.6-32on64-WoW64
+          name: wine9.7-exp-wow64
           path: ./*.tar.xz
