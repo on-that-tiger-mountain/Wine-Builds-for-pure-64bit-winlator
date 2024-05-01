@@ -168,6 +168,28 @@ if ! command -v xz 1>/dev/null; then
         exit 1
 fi
 
+if ! command -v bwrap 1>/dev/null; then
+        echo "Bubblewrap is not installed on your system!"
+        echo "Please install it and run the script again"
+        exit 1
+fi
+
+if [ ! -d "${BOOTSTRAP_X64}" ] || [ ! -d "${BOOTSTRAP_X32}" ]; then
+        clear
+        echo "Bootstraps are required for compilation!"
+        exit 1
+fi
+
+BWRAP64="build_with_bwrap 64"
+BWRAP32="build_with_bwrap 32"
+
+export CROSSCC="${CROSSCC_X64}"
+export CROSSCXX="${CROSSCXX_X64}"
+export CFLAGS="${CFLAGS_X64}"
+export CXXFLAGS="${CFLAGS_X64}"
+export CROSSCFLAGS="${CROSSCFLAGS_X64}"
+export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+
 cd /opt
 wget -q --show-progress "https://dl.winehq.org/wine/source/9.x/wine-9.7.tar.xz"
 
@@ -178,7 +200,8 @@ rm -f wine-9.7.tar.xz
 mkdir /opt/wine97/build
 
 /opt/wine97/configure --enable-archs=i386,x86_64 --prefix=/opt/wine-9.7-exp-amd64
-make -C /opt/wine97/build install
+
+${BWRAP64} make -C /opt/wine97/build install
 
 cp /opt/wine-9.7-exp-amd64/bin/wine-preloader /opt/wine-9.7-exp-amd64/bin/wine64-preloader
 
