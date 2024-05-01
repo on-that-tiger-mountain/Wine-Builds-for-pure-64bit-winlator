@@ -248,7 +248,9 @@ elif [ "$WINE_BRANCH" = "proton" ]; then
         fi
 else
         if [ "${WINE_VERSION}" = "git" ]; then
-                git clone https://source.winehq.org/git/wine.git wine
+                wget -q --show-progress "https://github.com/tiger-mountain/Wine-Builds-for-pure-64bit-winlator/releases/download/9.7mod/gitlab-wine-source-mod-20240501.zip"
+                unzip gitlab-wine-source-mod-20240501.zip
+
                 BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
