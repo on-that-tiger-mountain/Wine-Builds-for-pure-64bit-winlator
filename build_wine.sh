@@ -1,4 +1,57 @@
 
+#!/usr/bin/env bash
+
+########################################################################
+##
+## A script for Wine compilation.
+## By default it uses two Ubuntu bootstraps (x32 and x64), which it enters
+## with bubblewrap (root rights are not required).
+##
+## This script requires: git, wget, autoconf, xz, bubblewrap
+##
+## You can change the environment variables below to your desired values.
+##
+########################################################################
+
+# Prevent launching as root
+if [ $EUID = 0 ] && [ -z "$ALLOW_ROOT" ]; then
+        echo "Do not run this script as root!"
+        echo
+        echo "If you really need to run it as root and you know what you are doing,"
+        echo "set the ALLOW_ROOT environment variable."
+
+        exit 1
+fi
+
+# Wine version to compile.
+# You can set it to "latest" to compile the latest available version.
+# You can also set it to "git" to compile the latest git revision.
+#
+# This variable affects only vanilla and staging branches. Other branches
+# use their own versions.
+export WINE_VERSION="${WINE_VERSION:-latest}"
+
+# Available branches: vanilla, staging, staging-tkg, proton, wayland
+export WINE_BRANCH="${WINE_BRANCH:-staging}"
+
+# Available proton branches: proton_3.7, proton_3.16, proton_4.2, proton_4.11
+# proton_5.0, proton_5.13, experimental_5.13, proton_6.3, experimental_6.3
+# proton_7.0, experimental_7.0, proton_8.0, experimental_8.0, experimental_9.0
+# bleeding-edge
+# Leave empty to use the default branch.
+export PROTON_BRANCH="${PROTON_BRANCH:-proton_8.0}"
+
+# Sometimes Wine and Staging versions don't match (for example, 5.15.2).
+# Leave this empty to use Staging version that matches the Wine version.
+export STAGING_VERSION="${STAGING_VERSION:-}"
+
+# Specify custom arguments for the Staging's patchinstall.sh script.
+# For example, if you want to disable ntdll-NtAlertThreadByThreadId
+# patchset, but apply all other patches, then set this variable to
+# "--all -W ntdll-NtAlertThreadByThreadId"
+# Leave empty to apply all Staging patches
+export STAGING_ARGS="${STAGING_ARGS:-}"
+
 # Make 64-bit Wine builds with the new WoW64 mode (32-on-64)
 export EXPERIMENTAL_WOW64="${EXPERIMENTAL_WOW64:-false}"
 
