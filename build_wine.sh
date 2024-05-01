@@ -253,10 +253,10 @@ else
         else
                 BUILD_NAME="${WINE_VERSION}"
 
-                wget -q --show-progress "https://github.com/tiger-mountain/Wine-Builds-for-pure-64bit-winlator/releases/download/wine-9.6-mod/wine-9.6-mod.tar.xz"
+                wget -q --show-progress "https://github.com/tiger-mountain/Wine-Builds-for-pure-64bit-winlator/releases/download/wine-9.7-mod/wine-9.7-mod.tar.xz"
 
-                tar xf "wine-9.6-mod.tar.xz"
-                mv "wine-9.6" wine
+                tar xf "wine-9.7-mod.tar.xz"
+                mv "wine-9.7" wine
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
