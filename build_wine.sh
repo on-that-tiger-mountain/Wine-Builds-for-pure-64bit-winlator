@@ -253,7 +253,7 @@ else
         else
                 BUILD_NAME="${WINE_VERSION}"
 
-                wget -q --show-progress "https://github.com/tiger-mountain/Wine-Builds-for-pure-64bit-winlator/releases/download/9.7mod/gitlab-wine-source-mod-20240501.zip"
+                wget -q --show-progress "https://github.com/tiger-mountain/Wine-Builds-for-pure-64bit-winlator/releases/download/wine-9.6-mod/wine-9.6-mod.tar.xz"
                 unzip gitlab-wine-source-mod-20240501.zip
         fi
 
