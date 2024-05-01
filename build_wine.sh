@@ -248,17 +248,13 @@ elif [ "$WINE_BRANCH" = "proton" ]; then
         fi
 else
         if [ "${WINE_VERSION}" = "git" ]; then
-                wget -q --show-progress "https://github.com/tiger-mountain/Wine-Builds-for-pure-64bit-winlator/releases/download/9.7mod/gitlab-wine-source-mod-20240501.zip"
-                unzip gitlab-wine-source-mod-20240501.zip
-
-                BUILD_NAME="9.7"
+                git clone https://gitlab.winehq.org/wine/wine.git wine
+                BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
 
-                wget -q --show-progress "https://dl.winehq.org/wine/source/${WINE_URL_VERSION}/wine-${WINE_VERSION}.tar.xz"
-
-                tar xf "wine-${WINE_VERSION}.tar.xz"
-                mv "wine-${WINE_VERSION}" wine
+                wget -q --show-progress "https://github.com/tiger-mountain/Wine-Builds-for-pure-64bit-winlator/releases/download/9.7mod/gitlab-wine-source-mod-20240501.zip"
+                unzip gitlab-wine-source-mod-20240501.zip
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
