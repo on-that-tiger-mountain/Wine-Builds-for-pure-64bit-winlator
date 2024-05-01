@@ -248,7 +248,7 @@ elif [ "$WINE_BRANCH" = "proton" ]; then
         fi
 else
         if [ "${WINE_VERSION}" = "git" ]; then
-                git clone https://gitlab.winehq.org/wine/wine.git wine
+                git clone https://source.winehq.org/git/wine.git wine
                 BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
