@@ -38,7 +38,7 @@ export WINE_BRANCH="${WINE_BRANCH:-staging}"
 # proton_7.0, experimental_7.0, proton_8.0, experimental_8.0, experimental_9.0
 # bleeding-edge
 # Leave empty to use the default branch.
-export PROTON_BRANCH="${PROTON_BRANCH:-proton_8.0}"
+export PROTON_BRANCH="${PROTON_BRANCH:-proton_9.0}"
 
 # Sometimes Wine and Staging versions don't match (for example, 5.15.2).
 # Leave this empty to use Staging version that matches the Wine version.
@@ -99,8 +99,8 @@ export CROSSCXX_X32="i686-w64-mingw32-g++"
 export CROSSCC_X64="x86_64-w64-mingw32-gcc"
 export CROSSCXX_X64="x86_64-w64-mingw32-g++"
 
-export CFLAGS_X32="-march=i686 -msse2 -mfpmath=sse"
-export CFLAGS_X64="-march=x86-64 -msse3 -mfpmath=sse"
+export CFLAGS_X32="-march=i686 -msse2 -mfpmath=sse -O2 -ftree-vectorize"
+export CFLAGS_X64="-march=x86-64 -msse3 -mfpmath=sse -O2 -ftree-vectorize"
 export LDFLAGS="-Wl,-O1,--sort-common,--as-needed"
 
 export CROSSCFLAGS_X32="${CFLAGS_X32}"
@@ -240,6 +240,10 @@ elif [ "$WINE_BRANCH" = "proton" ]; then
                 patch -d wine -Np1 < "${scriptdir}"/proton-exp-9.0.patch
         fi
 
+        if [ "${PROTON_BRANCH}" = "proton_9.0" ]; then
+                patch -d wine -Np1 < "${scriptdir}"/proton-9.0.patch
+        fi
+
         WINE_VERSION="$(cat wine/VERSION | tail -c +14)-$(git -C wine rev-parse --short HEAD)"
         if [[ "${PROTON_BRANCH}" == "experimental_"* ]] || [ "${PROTON_BRANCH}" = "bleeding-edge" ]; then
                 BUILD_NAME=proton-exp-"${WINE_VERSION}"
@@ -253,13 +257,13 @@ else
         else
                 BUILD_NAME="${WINE_VERSION}"
 
-                git clone --single-branch --shallow-since 2021-03-01 https://gitlab.winehq.org/wine/wine.git
+                git clone https://gitlab.winehq.org/wine/wine.git wine
 
-                cd wine
+                 cd wine
 
-                git checkout 71d41b37a1917cdf20cdb171dc73c20dbfdaeefa
+                 git checkout 71d41b37a1917cdf20cdb171dc73c20dbfdaeefa
 
-                cd ..
+                 cd ..
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
@@ -348,6 +352,7 @@ if [ ! -d "${BOOTSTRAP_X64}" ] || [ ! -d "${BOOTSTRAP_X32}" ]; then
 fi
 
 BWRAP64="build_with_bwrap 64"
+BWRAP32="build_with_bwrap 32"
 
 export CROSSCC="${CROSSCC_X64}"
 export CROSSCXX="${CROSSCXX_X64}"
@@ -358,7 +363,7 @@ export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
 
 mkdir "${BUILD_DIR}"/build64
 cd "${BUILD_DIR}"/build64 || exit
-${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 --prefix="${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
+${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
 ${BWRAP64} make -j$(nproc)
 ${BWRAP64} make install
 
@@ -371,7 +376,7 @@ export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
 
 mkdir "${BUILD_DIR}"/build32-tools
 cd "${BUILD_DIR}"/build32-tools || exit
-PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig ${BWRAP32} "${BUILD_DIR}"/wine/configure --prefix="${BUILD_DIR}"/wine-"${BUILD_NAME}"-x86
+PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig ${BWRAP32} "${BUILD_DIR}"/wine/configure ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-x86
 ${BWRAP32} make -j$(nproc)
 ${BWRAP32} make install
 
@@ -382,7 +387,7 @@ export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
 
 mkdir "${BUILD_DIR}"/build32
 cd "${BUILD_DIR}"/build32 || exit
-PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig ${BWRAP32} "${BUILD_DIR}"/wine/configure --with-wine64="${BUILD_DIR}"/build64 --with-wine-tools="${BUILD_DIR}"/build32-tools --prefix="${BUILD_DIR}"/wine-${BUILD_NAME}-amd64
+PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig ${BWRAP32} "${BUILD_DIR}"/wine/configure --with-wine64="${BUILD_DIR}"/build64 --with-wine-tools="${BUILD_DIR}"/build32-tools ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-${BUILD_NAME}-amd64
 ${BWRAP32} make -j$(nproc)
 ${BWRAP32} make install
 
@@ -418,8 +423,8 @@ for build in ${builds_list}; do
                 fi
 
                 if [ "${EXPERIMENTAL_WOW64}" = "true" ]; then
-                        cp "${build}"/bin/wine-preloader "${build}"/bin/wine64-preloader
-                        cp "${build}"/bin/wine "${build}"/bin/wine64
+                        rm "${build}"/bin/wine "${build}"/bin/wine-preloader
+                        cp "${build}"/bin/wine64 "${build}"/bin/wine
                 fi
 
                 tar -Jcf "${build}".tar.xz "${build}"
