@@ -253,7 +253,8 @@ else
         else
                 BUILD_NAME="${WINE_VERSION}"
 
-                git clone --single-branch --shallow-since 2021-03-01 https://source.winehq.org/git/wine.git
+                git clone --single-branch --shallow-since 2021-03-01 https://gitlab.winehq.org/wine/wine.git
+
                 cd wine
 
                 git checkout 71d41b37a1917cdf20cdb171dc73c20dbfdaeefa
