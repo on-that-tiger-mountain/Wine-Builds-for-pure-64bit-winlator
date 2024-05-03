@@ -253,9 +253,13 @@ else
         else
                 BUILD_NAME="${WINE_VERSION}"
 
-                wget -q --show-progress "https://github.com/tiger-mountain/Wine-Builds-for-pure-64bit-winlator/releases/download/wine-9.6-mod/wine-9.6-mod.tar.xz"
+                git clone --single-branch --shallow-since 2021-03-01 https://source.winehq.org/git/wine.git wine-9.6
+                cd wine-9.6
 
-                tar xf "wine-9.6-mod.tar.xz"
+                git checkout 71d41b37a1917cdf20cdb171dc73c20dbfdaeefa
+
+                cd ..
+
                 mv "wine-9.6" wine
         fi
 
