@@ -99,8 +99,8 @@ export CROSSCXX_X32="i686-w64-mingw32-g++"
 export CROSSCC_X64="x86_64-w64-mingw32-gcc"
 export CROSSCXX_X64="x86_64-w64-mingw32-g++"
 
-export CFLAGS_X32="-march=i686 -msse2 -mfpmath=sse -O2 -ftree-vectorize"
-export CFLAGS_X64="-march=x86-64 -msse3 -mfpmath=sse -O2 -ftree-vectorize"
+export CFLAGS_X32="-march=i686 -msse2 -mfpmath=sse"
+export CFLAGS_X64="-march=x86-64 -msse3 -mfpmath=sse"
 export LDFLAGS="-Wl,-O1,--sort-common,--as-needed"
 
 export CROSSCFLAGS_X32="${CFLAGS_X32}"
@@ -363,7 +363,7 @@ export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
 
 mkdir "${BUILD_DIR}"/build64
 cd "${BUILD_DIR}"/build64 || exit
-${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
+${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
 ${BWRAP64} make -j$(nproc)
 ${BWRAP64} make install
 
@@ -376,7 +376,7 @@ export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
 
 mkdir "${BUILD_DIR}"/build32-tools
 cd "${BUILD_DIR}"/build32-tools || exit
-PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig ${BWRAP32} "${BUILD_DIR}"/wine/configure ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-x86
+PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig ${BWRAP32} "${BUILD_DIR}"/wine/configure --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-x86
 ${BWRAP32} make -j$(nproc)
 ${BWRAP32} make install
 
@@ -387,7 +387,7 @@ export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
 
 mkdir "${BUILD_DIR}"/build32
 cd "${BUILD_DIR}"/build32 || exit
-PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig ${BWRAP32} "${BUILD_DIR}"/wine/configure --with-wine64="${BUILD_DIR}"/build64 --with-wine-tools="${BUILD_DIR}"/build32-tools ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-${BUILD_NAME}-amd64
+PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig ${BWRAP32} "${BUILD_DIR}"/wine/configure --with-wine64="${BUILD_DIR}"/build64 --with-wine-tools="${BUILD_DIR}"/build32-tools --prefix "${BUILD_DIR}"/wine-${BUILD_NAME}-amd64
 ${BWRAP32} make -j$(nproc)
 ${BWRAP32} make install
 
@@ -423,8 +423,8 @@ for build in ${builds_list}; do
                 fi
 
                 if [ "${EXPERIMENTAL_WOW64}" = "true" ]; then
-                        rm "${build}"/bin/wine "${build}"/bin/wine-preloader
-                        cp "${build}"/bin/wine64 "${build}"/bin/wine
+                        cp "${build}"/bin/wine-preloader "${build}"/bin/wine64-preloader
+                        cp "${build}"/bin/wine "${build}"/bin/wine64
                 fi
 
                 tar -Jcf "${build}".tar.xz "${build}"
