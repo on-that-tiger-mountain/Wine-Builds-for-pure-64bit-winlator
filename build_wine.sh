@@ -261,7 +261,7 @@ else
 
                  cd wine
 
-                 git checkout dfff9217746e5076aba35513c6d4bc3d271d109c
+                 git checkout 975d0632a19efd41338cb73a97f1b0bdbe7bc0cc
 
                  cd ..
         fi
