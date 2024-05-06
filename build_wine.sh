@@ -256,14 +256,11 @@ else
                 BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
+                 wget -q --show-progress https://github.com/tiger-mountain/Wine-Builds-for-pure-64bit-winlator/releases/download/wine-9.6-mod/wine-9.6-mod.tar.xz
 
-                git clone https://gitlab.winehq.org/wine/wine.git wine
+                 tar -xvf wine-9.6-mod.tar.xz
 
-                 cd wine
-
-                 git checkout 336c37d5f7c9b4f5bbb3d1ca64a504cd2f364f6b
-
-                 cd ..
+                 mv "wine-9.6" wine
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
