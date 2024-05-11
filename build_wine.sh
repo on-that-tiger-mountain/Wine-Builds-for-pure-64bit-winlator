@@ -360,9 +360,33 @@ export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
 
 mkdir "${BUILD_DIR}"/build64
 cd "${BUILD_DIR}"/build64 || exit
-${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-archs=i386,x86_64 --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
+${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
 ${BWRAP64} make -j$(nproc)
 ${BWRAP64} make install
+
+export CROSSCC="${CROSSCC_X32}"
+export CROSSCXX="${CROSSCXX_X32}"
+export CFLAGS="${CFLAGS_X32}"
+export CXXFLAGS="${CFLAGS_X32}"
+export CROSSCFLAGS="${CROSSCFLAGS_X32}"
+export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
+
+mkdir "${BUILD_DIR}"/build32-tools
+cd "${BUILD_DIR}"/build32-tools || exit
+PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig ${BWRAP32} "${BUILD_DIR}"/wine/configure ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-x86
+${BWRAP32} make -j$(nproc)
+${BWRAP32} make install
+
+export CFLAGS="${CFLAGS_X64}"
+export CXXFLAGS="${CFLAGS_X64}"
+export CROSSCFLAGS="${CROSSCFLAGS_X64}"
+export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+
+mkdir "${BUILD_DIR}"/build32
+cd "${BUILD_DIR}"/build32 || exit
+PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig ${BWRAP32} "${BUILD_DIR}"/wine/configure --with-wine64="${BUILD_DIR}"/build64 --with-wine-tools="${BUILD_DIR}"/build32-tools ${WINE_BUILD_OPTIONS} --prefix "${BUILD_DIR}"/wine-${BUILD_NAME}-amd64
+${BWRAP32} make -j$(nproc)
+${BWRAP32} make install
 
 echo
 echo "Compilation complete"
