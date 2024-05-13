@@ -360,7 +360,7 @@ export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
 
 mkdir "${BUILD_DIR}"/build64
 cd "${BUILD_DIR}"/build64 || exit
-${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-archs=i386,x86_64 --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
+${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-amd64
 ${BWRAP64} make -j$(nproc)
 ${BWRAP64} make install
 
@@ -396,8 +396,8 @@ for build in ${builds_list}; do
                 fi
 
                 if [ "${EXPERIMENTAL_WOW64}" = "true" ]; then
-                        cp "${build}"/bin/wine-preloader "${build}"/bin/wine64-preloader
-                        cp "${build}"/bin/wine "${build}"/bin/wine64
+                        rm "${build}"/bin/wine-preloader
+                        cp "${build}"/bin/wine64 "${build}"/bin/wine
                 fi
 
                 tar -Jcf "${build}".tar.xz "${build}"
