@@ -396,7 +396,7 @@ for build in ${builds_list}; do
                 fi
 
                 if [ "${EXPERIMENTAL_WOW64}" = "true" ]; then
-                        rm "${build}"/bin/wine-preloader
+                        rm "${build}"/bin/wine "${build}"/bin/wine-preloader
                         cp "${build}"/bin/wine64 "${build}"/bin/wine
                 fi
 
