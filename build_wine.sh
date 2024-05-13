@@ -364,6 +364,29 @@ ${BWRAP64} "${BUILD_DIR}"/wine/configure --enable-win64 --prefix "${BUILD_DIR}"/
 ${BWRAP64} make -j$(nproc)
 ${BWRAP64} make install
 
+export CROSSCC="${CROSSCC_X32}"
+export CROSSCXX="${CROSSCXX_X32}"
+export CFLAGS="${CFLAGS_X32}"
+export CXXFLAGS="${CFLAGS_X32}"
+export CROSSCFLAGS="${CROSSCFLAGS_X32}"
+export CROSSCXXFLAGS="${CROSSCFLAGS_X32}"
+
+mkdir "${BUILD_DIR}"/build32-tools
+cd "${BUILD_DIR}"/build32-tools || exit
+PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig ${BWRAP32} "${BUILD_DIR}"/wine/configure --prefix "${BUILD_DIR}"/wine-"${BUILD_NAME}"-x86
+${BWRAP32} make -j$(nproc)
+${BWRAP32} make install
+
+export CFLAGS="${CFLAGS_X64}"
+export CXXFLAGS="${CFLAGS_X64}"
+export CROSSCFLAGS="${CROSSCFLAGS_X64}"
+export CROSSCXXFLAGS="${CROSSCFLAGS_X64}"
+
+mkdir "${BUILD_DIR}"/build32
+cd "${BUILD_DIR}"/build32 || exit
+PKG_CONFIG_LIBDIR=/usr/lib/i386-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/lib/i386-linux-gnu/pkgconfig ${BWRAP32} "${BUILD_DIR}"/wine/configure --with-wine64="${BUILD_DIR}"/build64 --with-wine-tools="${BUILD_DIR}"/build32-tools --prefix "${BUILD_DIR}"/wine-${BUILD_NAME}-amd64
+${BWRAP32} make -j$(nproc)
+${BWRAP32} make install
 echo
 echo "Compilation complete"
 echo "Creating and compressing archives..."
@@ -398,6 +421,7 @@ for build in ${builds_list}; do
                 if [ "${EXPERIMENTAL_WOW64}" = "true" ]; then
                         rm "${build}"/bin/wine "${build}"/bin/wine-preloader
                         cp "${build}"/bin/wine64 "${build}"/bin/wine
+                        rm -rf "${build}"/lib/wine/i386-unix
                 fi
 
                 tar -Jcf "${build}".tar.xz "${build}"
