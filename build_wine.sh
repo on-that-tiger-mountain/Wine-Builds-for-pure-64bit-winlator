@@ -256,9 +256,9 @@ else
                 BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
-                 wget -q --show-progress https://github.com/tiger-mountain/Wine-Builds-for-pure-64bit-winlator/releases/download/wine-9.6-mod/wine-9.6-mod.tar.gz
+                 wget -q --show-progress https://github.com/tiger-mountain/Wine-Builds-for-pure-64bit-winlator/releases/download/wine-9.6-mod/wine-9.6-mod2.tar.gz
 
-                 tar -xvf wine-9.6-mod.tar.gz
+                 tar -xvf wine-9.6-mod2.tar.gz
 
                  mv "wine-9.6" wine
         fi
