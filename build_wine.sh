@@ -256,11 +256,11 @@ else
                 BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
-                 wget -q --show-progress https://github.com/tiger-mountain/Wine-Builds-for-pure-64bit-winlator/releases/download/wine-9.6-mod/wine-9.6-mod2.tar.gz
+                 wget -q --show-progress https://github.com/tiger-mountain/Wine-Builds-for-pure-64bit-winlator/releases/download/wine-9.2-mod/wine-9.2-mod.tar.gz
 
-                 tar -xvf wine-9.6-mod2.tar.gz
+                 tar -xvf wine-9.2-mod.tar.gz
 
-                 mv "wine-9.6" wine
+                 mv "wine-9.2" wine
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
@@ -420,9 +420,13 @@ for build in ${builds_list}; do
                 fi
 
                 if [ "${EXPERIMENTAL_WOW64}" = "true" ]; then
+                        cp "${build}"/bin/wine "${build}"/bin/wine32
+                        cp "${build}"/bin/wine-preloader "${build}"/bin/wine32-preloader
                         rm "${build}"/bin/wine "${build}"/bin/wine-preloader
+                        cp "${build}"/bin/wine64 "${build}"/bin/wine-wow64
+                        cp "${build}"/bin/wine64-preloader "${build}"/bin/wine-preloader-wow64
                         cp "${build}"/bin/wine64 "${build}"/bin/wine
-                        rm -rf "${build}"/lib/wine/i386-unix
+                        cp "${build}"/bin/wine64-preloader "${build}"/bin/wine-preloader
                 fi
 
                 tar -Jcf "${build}".tar.xz "${build}"
