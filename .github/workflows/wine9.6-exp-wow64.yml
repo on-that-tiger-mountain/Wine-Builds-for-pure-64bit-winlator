@@ -1,4 +1,4 @@
-name: wine9.2-exp-wow64 CI
+name: wine9.6-exp-wow64 CI
 
 on:
   schedule:
