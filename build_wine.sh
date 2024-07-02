@@ -256,7 +256,7 @@ else
                 BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
-                 git clone https://github.com/on-that-tiger-mountain/wine-9.2-custom wine-9.2
+                 git clone -b wine-9.2-custom-test https://github.com/on-that-tiger-mountain/wine-9.2-custom wine-9.2
 
                  mv "wine-9.2" wine
         fi
