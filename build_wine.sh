@@ -256,9 +256,9 @@ else
                 BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
-                 git clone -b wine-9.2-custom-test https://github.com/on-that-tiger-mountain/wine-9.2-custom wine-9.2
+                 git clone -b wine-4.2 https://gitlab.winehq.org/wine/wine.git wine-4.2
 
-                 mv "wine-9.2" wine
+                 mv "wine-4.2" wine
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
