@@ -256,9 +256,9 @@ else
                 BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
-                 git clone -b wine-4.2 https://gitlab.winehq.org/wine/wine.git wine-4.2
-
-                 mv "wine-4.2" wine
+                git clone -b wine-4.2 https://gitlab.winehq.org/wine/wine.git wine-4.2
+                mv "wine-4.2" wine
+                patch -d wine -Np1 < "${scriptdir}"/proton-exp-9.0.patch
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
