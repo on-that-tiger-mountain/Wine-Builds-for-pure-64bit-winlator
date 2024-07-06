@@ -1,0 +1,33 @@
+From 40c9b46500c3606e966d5404d45b68a48609b6ea Mon Sep 17 00:00:00 2001
+From: Dmitry Timoshkov <dmitry@baikal.ru>
+Date: Thu, 28 Feb 2019 20:37:47 +0300
+Subject: [PATCH] wpcap: Fix compilation with recent pcap/pcap.h versions.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf8
+Content-Transfer-Encoding: 8bit
+
+Recent libpcap versions have added inclusion of pcap/socket.h
+to pcap.h that includes sys/socket.h and other system .h files
+that lead to conflicts with winsock2.h.
+
+Signed-off-by: Dmitry Timoshkov <dmitry@baikal.ru>
+Signed-off-by: AndrÃ© Hentschel <nerv@dawncrow.de>
+Signed-off-by: Alexandre Julliard <julliard@winehq.org>
+---
+ dlls/wpcap/wpcap.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/dlls/wpcap/wpcap.c b/dlls/wpcap/wpcap.c
+index e7908cd038a..f1632351388 100644
+--- a/dlls/wpcap/wpcap.c
++++ b/dlls/wpcap/wpcap.c
+@@ -24,6 +24,7 @@
+ #undef SOCKET
+ #undef INVALID_SOCKET
+ 
++#define USE_WS_PREFIX
+ #include "winsock2.h"
+ #include "windef.h"
+ #include "winbase.h"
+-- 
+2.30.2
