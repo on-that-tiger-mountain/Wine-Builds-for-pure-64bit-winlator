@@ -257,6 +257,8 @@ else
         else
                 BUILD_NAME="${WINE_VERSION}"
                 git clone -b wine-4.2 https://gitlab.winehq.org/wine/wine.git wine-4.2
+
+                git checkout 6de638eac780d013926706f77e74dd42909f6af6
                 mv "wine-4.2" wine
                 patch -d wine -Np1 < "${scriptdir}"/wpcap.patch
         fi
