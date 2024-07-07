@@ -256,11 +256,8 @@ else
                 BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
-                git clone https://gitlab.winehq.org/wine/wine.git
-                cd wine
-                git checkout ddfa042db1112488e2b110963aa78226107742be
-                cd ..
-                patch -d wine -Np1 < "${scriptdir}"/wpcap.patch
+                git clone -b wine-9.2-custom-test2 https://github.com/on-that-tiger-mountain/wine-9.2-custom.git
+                mv wine-9.2-custom wine
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
