@@ -258,7 +258,7 @@ else
                 BUILD_NAME="${WINE_VERSION}"
                 git clone https://gitlab.winehq.org/wine/wine.git
                 cd wine
-                git checkout 145b4109205c385cf1bd1ecd8a18e47c9f27a9fd
+                git checkout c91f254a7740dacd5cb6bc3f8817cd1806bddeb4
                 cd ..
                 patch -d wine -Np1 < "${scriptdir}"/wpcap.patch
         fi
