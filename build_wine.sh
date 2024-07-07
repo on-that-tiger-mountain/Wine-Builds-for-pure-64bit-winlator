@@ -256,10 +256,10 @@ else
                 BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
-                git clone -b wine-4.2 https://gitlab.winehq.org/wine/wine.git wine-4.2
-
+                git clone https://gitlab.winehq.org/wine/wine.git
+                cd wine
                 git checkout 6de638eac780d013926706f77e74dd42909f6af6
-                mv "wine-4.2" wine
+                cd ..
                 patch -d wine -Np1 < "${scriptdir}"/wpcap.patch
         fi
 
