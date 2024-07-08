@@ -256,8 +256,11 @@ else
                 BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
-                git clone -b wine-9.2-custom-test2 https://github.com/on-that-tiger-mountain/wine-9.2-custom.git
-                mv wine-9.2-custom wine
+                git clone https://gitlab.winehq.org/wine/wine.git wine
+                cd wine
+                git checkout 4336ed0b84b3dd3097bbbbf8e4b9de2e4d444ad7
+                cd ..
+                patch -d wine -Np1 < "${scriptdir}"/msi-revert.patch
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
