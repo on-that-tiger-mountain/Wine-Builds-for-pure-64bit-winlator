@@ -1,0 +1,26 @@
+From c91f254a7740dacd5cb6bc3f8817cd1806bddeb4 Mon Sep 17 00:00:00 2001
+From: Mark Jansen <mark.jansen@reactos.org>
+Date: Sun, 17 Feb 2019 16:52:46 +0100
+Subject: [PATCH] msi: Do not leak rootkey.
+
+Signed-off-by: Mark Jansen <mark.jansen@reactos.org>
+Signed-off-by: Hans Leidekker <hans@codeweavers.com>
+Signed-off-by: Alexandre Julliard <julliard@winehq.org>
+---
+ dlls/msi/source.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/dlls/msi/source.c b/dlls/msi/source.c
+index 904589e947c..e2cf7fc8ad7 100644
+--- a/dlls/msi/source.c
++++ b/dlls/msi/source.c
+@@ -98,7 +98,6 @@ static UINT OpenSourceKey(LPCWSTR szProduct, HKEY* key, DWORD dwOptions,
+         if (rc != ERROR_SUCCESS)
+             rc = ERROR_BAD_CONFIGURATION;
+     }
+-    RegCloseKey(rootkey);
+ 
+     return rc;
+ }
+-- 
+2.30.2
