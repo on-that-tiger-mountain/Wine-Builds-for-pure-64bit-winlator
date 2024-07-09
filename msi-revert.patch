@@ -14,7 +14,7 @@ diff --git a/dlls/msi/source.c b/dlls/msi/source.c
 index 904589e947c..e2cf7fc8ad7 100644
 --- a/dlls/msi/source.c
 +++ b/dlls/msi/source.c
-@@ -98,7 +98,6 @@ static UINT OpenSourceKey(LPCWSTR szProduct, HKEY* key, DWORD dwOptions,
+@@ -97,7 +97,6 @@ static UINT OpenSourceKey(LPCWSTR szProduct, HKEY* key, DWORD dwOptions,
          if (rc != ERROR_SUCCESS)
              rc = ERROR_BAD_CONFIGURATION;
      }
