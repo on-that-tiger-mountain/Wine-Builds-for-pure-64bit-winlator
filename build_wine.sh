@@ -262,6 +262,7 @@ else
                 cd ..
                 patch -d wine -Np1 < "${scriptdir}"/wpcap.patch
                 patch -d wine -Np1 < "${scriptdir}"/msi-revert.patch
+                patch -d wine -Np1 < "${scriptdir}"/msi-revert2.patch
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
