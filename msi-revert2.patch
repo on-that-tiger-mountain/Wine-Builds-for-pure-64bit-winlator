@@ -18,7 +18,7 @@ diff --git a/dlls/msi/source.c b/dlls/msi/source.c
 index e2cf7fc8ad7..3640b0dfbd2 100644
 --- a/dlls/msi/source.c
 +++ b/dlls/msi/source.c
-@@ -592,11 +592,8 @@ UINT WINAPI MsiSourceListGetInfoW( LPCWSTR szProduct, LPCWSTR szUserSid,
+@@ -591,11 +591,8 @@ UINT WINAPI MsiSourceListGetInfoW( LPCWSTR szProduct, LPCWSTR szUserSid,
                                0, 0, NULL, &size);
          if (rc != ERROR_SUCCESS)
          {
@@ -32,7 +32,7 @@ index e2cf7fc8ad7..3640b0dfbd2 100644
          }
  
          source = msi_alloc(size);
-@@ -630,7 +627,7 @@ UINT WINAPI MsiSourceListGetInfoW( LPCWSTR szProduct, LPCWSTR szUserSid,
+@@ -629,7 +626,7 @@ UINT WINAPI MsiSourceListGetInfoW( LPCWSTR szProduct, LPCWSTR szUserSid,
              else
                  ptr++;
          }
@@ -45,7 +45,7 @@ diff --git a/dlls/msi/tests/source.c b/dlls/msi/tests/source.c
 index 654df35f540..3d4a9550055 100644
 --- a/dlls/msi/tests/source.c
 +++ b/dlls/msi/tests/source.c
-@@ -48,8 +48,6 @@ static UINT (WINAPI *pMsiSourceListEnumSourcesA)
+@@ -49,8 +49,6 @@ static UINT (WINAPI *pMsiSourceListEnumSourcesA)
      (LPCSTR, LPCSTR, MSIINSTALLCONTEXT, DWORD, DWORD, LPSTR, LPDWORD);
  static UINT (WINAPI *pMsiSourceListGetInfoA)
      (LPCSTR, LPCSTR, MSIINSTALLCONTEXT, DWORD, LPCSTR, LPSTR, LPDWORD);
@@ -54,7 +54,7 @@ index 654df35f540..3d4a9550055 100644
  static UINT (WINAPI *pMsiSourceListSetInfoA)
      (LPCSTR, LPCSTR, MSIINSTALLCONTEXT,  DWORD,LPCSTR,  LPCSTR);
  static UINT (WINAPI *pMsiSourceListAddSourceA)
-@@ -71,7 +69,6 @@ static void init_functionpointers(void)
+@@ -72,7 +70,6 @@ static void init_functionpointers(void)
      GET_PROC(hmsi, MsiSourceListEnumMediaDisksA)
      GET_PROC(hmsi, MsiSourceListEnumSourcesA)
      GET_PROC(hmsi, MsiSourceListGetInfoA)
@@ -62,7 +62,7 @@ index 654df35f540..3d4a9550055 100644
      GET_PROC(hmsi, MsiSourceListSetInfoA)
      GET_PROC(hmsi, MsiSourceListAddSourceA)
  
-@@ -182,21 +179,14 @@ static void check_reg_str(HKEY prodkey, LPCSTR name, LPCSTR expected, BOOL bcase
+@@ -183,21 +180,14 @@ static void check_reg_str(HKEY prodkey, LPCSTR name, LPCSTR expected, BOOL bcase
  #define CHECK_REG_STR(prodkey, name, expected) \
      check_reg_str(prodkey, name, expected, TRUE, __LINE__);
  
@@ -90,7 +90,7 @@ index 654df35f540..3d4a9550055 100644
      LONG res;
      UINT r;
      HKEY userkey, hkey, media;
-@@ -426,30 +416,6 @@ static void test_MsiSourceListGetInfo(void)
+@@ -427,30 +417,6 @@ static void test_MsiSourceListGetInfo(void)
      ok(!lstrcmpA(value, "prompt"), "Expected \"prompt\", got \"%s\"\n", value);
      ok(size == 6, "Expected 6, got %d\n", size);
  
