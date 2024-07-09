@@ -260,6 +260,7 @@ else
                 cd wine
                 git checkout 145b4109205c385cf1bd1ecd8a18e47c9f27a9fd
                 cd ..
+                patch -d wine -Np1 < "${scriptdir}"/wpcap.patch
                 patch -d wine -Np1 < "${scriptdir}"/msi-revert.patch
         fi
 
