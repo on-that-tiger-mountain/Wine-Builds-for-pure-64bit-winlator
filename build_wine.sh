@@ -258,8 +258,9 @@ else
                 BUILD_NAME="${WINE_VERSION}"
                 git clone https://gitlab.winehq.org/wine/wine.git wine
                 cd wine
-                git checkout 647c54e539c6dcc76c6289bad0fc387274d999eb
+                git checkout 2c903e9e9bb1254a9fbed60767b56668e675f64e
                 cd ..
+                patch -d wine -Np1 < "${scriptdir}"/ntdll-revert.patch
                 patch -d wine -Np1 < "${scriptdir}"/msi-revert2.patch
                 patch -d wine -Np1 < "${scriptdir}"/msi-revert.patch
         fi
