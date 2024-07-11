@@ -70,7 +70,7 @@ index 232d6aa06c1..fe7d933c0fa 100644
          timeout -= 5;
  
          if ( status == STATUS_TIMEOUT )
-@@ -270,14 +308,14 @@ NTSTATUS WINAPI RtlpWaitForCriticalSection( RTL_CRITICAL_SECTION *crit )
+@@ -308,14 +270,14 @@ NTSTATUS WINAPI RtlpWaitForCriticalSection( RTL_CRITICAL_SECTION *crit )
              if (!name) name = "?";
              ERR( "section %p %s wait timed out in thread %04x, blocked by %04x, retrying (60 sec)\n",
                   crit, debugstr_a(name), GetCurrentThreadId(), HandleToULong(crit->OwningThread) );
