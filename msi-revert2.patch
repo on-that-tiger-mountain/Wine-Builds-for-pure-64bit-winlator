@@ -22,13 +22,13 @@ index e2cf7fc8ad7..3640b0dfbd2 100644
                                0, 0, NULL, &size);
          if (rc != ERROR_SUCCESS)
          {
-+            RegCloseKey(sourcekey);
-+            return ERROR_SUCCESS;
 -            static WCHAR szEmpty[1] = { '\0' };
 -            rc = ERROR_SUCCESS;
 -            source = NULL;
 -            ptr = szEmpty;
 -            goto output_out;
++            RegCloseKey(sourcekey);
++            return ERROR_SUCCESS;
          }
  
          source = msi_alloc(size);
@@ -36,8 +36,8 @@ index e2cf7fc8ad7..3640b0dfbd2 100644
              else
                  ptr++;
          }
-+
 -output_out:
++
          if (szValue)
          {
              if (strlenW(ptr) < *pcchValue)
@@ -78,15 +78,15 @@ index 654df35f540..3d4a9550055 100644
 -
  static void test_MsiSourceListGetInfo(void)
  {
+-    char prodcode[MAX_PATH], prod_squashed[MAX_PATH], keypath[MAX_PATH * 2], value[MAX_PATH], *usersid;
+-    WCHAR valueW[MAX_PATH], *usersidW, *prodcodeW;
+-    const char *data;
 +    CHAR prodcode[MAX_PATH];
 +    CHAR prod_squashed[MAX_PATH];
 +    CHAR keypath[MAX_PATH*2];
 +    CHAR value[MAX_PATH];
 +    LPSTR usersid;
 +    LPCSTR data;
--    char prodcode[MAX_PATH], prod_squashed[MAX_PATH], keypath[MAX_PATH * 2], value[MAX_PATH], *usersid;
--    WCHAR valueW[MAX_PATH], *usersidW, *prodcodeW;
--    const char *data;
      LONG res;
      UINT r;
      HKEY userkey, hkey, media;
