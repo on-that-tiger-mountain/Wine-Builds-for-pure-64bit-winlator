@@ -260,9 +260,6 @@ else
                 cd wine
                 git checkout 64b96eec7d0aea470f897a3ed0ac9e1b3a680cc5
                 cd ..
-                #patch -d wine -Np1 < "${scriptdir}"/ntdll-revert.patch
-                #patch -d wine -Np1 < "${scriptdir}"/msi-revert2.patch
-                #patch -d wine -Np1 < "${scriptdir}"/msi-revert.patch
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
