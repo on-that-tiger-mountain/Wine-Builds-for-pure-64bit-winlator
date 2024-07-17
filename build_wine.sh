@@ -258,11 +258,11 @@ else
                 BUILD_NAME="${WINE_VERSION}"
                 git clone https://gitlab.winehq.org/wine/wine.git wine
                 cd wine
-                git checkout 124cd264fa258354383d9a5d6dd995d8f7868e4b
+                git checkout 64b96eec7d0aea470f897a3ed0ac9e1b3a680cc5
                 cd ..
-                patch -d wine -Np1 < "${scriptdir}"/ntdll-revert.patch
-                patch -d wine -Np1 < "${scriptdir}"/msi-revert2.patch
-                patch -d wine -Np1 < "${scriptdir}"/msi-revert.patch
+                #patch -d wine -Np1 < "${scriptdir}"/ntdll-revert.patch
+                #patch -d wine -Np1 < "${scriptdir}"/msi-revert2.patch
+                #patch -d wine -Np1 < "${scriptdir}"/msi-revert.patch
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
