@@ -258,8 +258,9 @@ else
                 BUILD_NAME="${WINE_VERSION}"
                 git clone https://gitlab.winehq.org/wine/wine.git wine
                 cd wine
-                git checkout 000b637fa0d4e50c5534aa8520ac625b054cdf07
+                git checkout 7af93f497c3e71f69511743f42b86b2ef5e13b32
                 cd ..
+                patch -d wine -Np1 < "${scriptdir}"/sfc.patch
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
