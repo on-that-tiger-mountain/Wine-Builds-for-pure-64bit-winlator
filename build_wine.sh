@@ -258,7 +258,7 @@ else
                 BUILD_NAME="${WINE_VERSION}"
                 git clone https://gitlab.winehq.org/wine/wine.git wine
                 cd wine
-                git checkout 594e431e36d65e470bcbe930eb3d0f2bbca17736
+                git checkout 000b637fa0d4e50c5534aa8520ac625b054cdf07
                 cd ..
         fi
 
