@@ -258,7 +258,7 @@ else
                 BUILD_NAME="${WINE_VERSION}"
                 git clone https://gitlab.winehq.org/wine/wine.git wine
                 cd wine
-                git checkout 97d6cfd7059fbe55fdd24a04e8d9133848328d4e
+                git checkout ad53edfab98a1544b4367a4afa31f5fe770bc03e
                 cd ..
                 #patch -d wine -Np1 < "${scriptdir}"/sfc.patch
         fi
