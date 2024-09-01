@@ -259,7 +259,7 @@ else
                 git clone https://gitlab.winehq.org/wine/wine.git wine
                 #git clone -b wine-9.2-custom-fixmapshared https://github.com/on-that-tiger-mountain/wine-9.2-custom.git wine
                 cd wine
-                git checkout a81bcbe0a90395eef972b494986fed1f3813fdb4
+                git checkout f6a1844dbed91b441ad69e7b15b5be242d063e87
                 cd ..
                 #patch -d wine -Np1 < "${scriptdir}"/sfc.patch
         fi
