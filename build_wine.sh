@@ -256,11 +256,11 @@ else
                 BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
-                #git clone https://gitlab.winehq.org/wine/wine.git wine
-                git clone -b wine-9.2-custom-fixmapshared https://github.com/on-that-tiger-mountain/wine-9.2-custom.git wine
-                #cd wine
-                #git checkout 87164ee3332c95f0cd9a1f3e4598056689cdfadc
-                #cd ..
+                git clone https://gitlab.winehq.org/wine/wine.git wine
+                #git clone -b wine-9.2-custom-fixmapshared https://github.com/on-that-tiger-mountain/wine-9.2-custom.git wine
+                cd wine
+                git checkout 00198c4084a61f65f18574d16833d945e50c0614
+                cd ..
                 #patch -d wine -Np1 < "${scriptdir}"/sfc.patch
         fi
 
