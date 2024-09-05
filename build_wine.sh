@@ -261,7 +261,7 @@ else
                 git clone https://gitlab.winehq.org/wine/wine.git wine
                 #git clone -b wine-9.2-custom-fixmapshared https://github.com/on-that-tiger-mountain/wine-9.2-custom.git wine
                 cd wine
-                git checkout 319abecc41d36e9c4d31ec9bf463b1d7ac4aa51e
+                git checkout 9dd88e31efd753ff0c6f0c5ac077773464519cc9
                 cd ..
                 patch -d wine -Np1 < "${scriptdir}"/wpcap.patch
         fi
