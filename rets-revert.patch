@@ -1,0 +1,428 @@
+From 409497ee8439479278f04a7c28f35013630f5b1e Mon Sep 17 00:00:00 2001
+From: Nikolay Sivov <nsivov@codeweavers.com>
+Date: Mon, 23 Apr 2018 17:04:03 +0430
+Subject: [PATCH] wined3d: Add support for setting multiple scissor rectangles.
+
+Signed-off-by: Nikolay Sivov <nsivov@codeweavers.com>
+Signed-off-by: Henri Verbeet <hverbeet@codeweavers.com>
+Signed-off-by: Alexandre Julliard <julliard@winehq.org>
+---
+ dlls/d3d11/device.c            |  4 ++--
+ dlls/d3d9/device.c             |  2 +-
+ dlls/wined3d/context.c         |  4 ++++
+ dlls/wined3d/cs.c              | 34 ++++++++++++++++++------------
+ dlls/wined3d/device.c          | 45 +++++++++++++++++++++++++--------------
+ dlls/wined3d/state.c           | 48 ++++++++++++++++++++++++++++++++----------
+ dlls/wined3d/stateblock.c      | 17 ++++++++++-----
+ dlls/wined3d/wined3d.spec      |  2 +-
+ dlls/wined3d/wined3d_private.h |  6 ++++--
+ include/wine/wined3d.h         |  3 ++-
+ 10 files changed, 113 insertions(+), 52 deletions(-)
+
+diff --git a/dlls/d3d11/device.c b/dlls/d3d11/device.c
+index 73779520360..a8251aad27a 100644
+--- a/dlls/d3d11/device.c
++++ b/dlls/d3d11/device.c
+@@ -998,7 +998,7 @@ static void STDMETHODCALLTYPE d3d11_immediate_context_RSSetScissorRects(ID3D11De
+         return;
+ 
+     wined3d_mutex_lock();
++    wined3d_device_set_scissor_rect(device->wined3d_device, rects);
+-    wined3d_device_set_scissor_rects(device->wined3d_device, 1, rects);
+     wined3d_mutex_unlock();
+ }
+ 
+@@ -4192,7 +4192,7 @@ static void STDMETHODCALLTYPE d3d10_device_RSSetScissorRects(ID3D10Device1 *ifac
+         return;
+ 
+     wined3d_mutex_lock();
++    wined3d_device_set_scissor_rect(device->wined3d_device, rects);
+-    wined3d_device_set_scissor_rects(device->wined3d_device, 1, rects);
+     wined3d_mutex_unlock();
+ }
+ 
+diff --git a/dlls/d3d9/device.c b/dlls/d3d9/device.c
+index 0a77b3e316b..b73d9748607 100644
+--- a/dlls/d3d9/device.c
++++ b/dlls/d3d9/device.c
+@@ -2564,7 +2564,7 @@ static HRESULT WINAPI d3d9_device_SetScissorRect(IDirect3DDevice9Ex *iface, cons
+     TRACE("iface %p, rect %p.\n", iface, rect);
+ 
+     wined3d_mutex_lock();
++    wined3d_device_set_scissor_rect(device->wined3d_device, rect);
+-    wined3d_device_set_scissor_rects(device->wined3d_device, 1, rect);
+     wined3d_mutex_unlock();
+ 
+     return D3D_OK;
+diff --git a/dlls/wined3d/context.c b/dlls/wined3d/context.c
+index d5378e203e0..4e1e032c00d 100644
+--- a/dlls/wined3d/context.c
++++ b/dlls/wined3d/context.c
+@@ -2244,10 +2244,6 @@ struct wined3d_context *context_create(struct wined3d_swapchain *swapchain,
+     if (device->dummy_textures.tex_2d)
+         context_bind_dummy_textures(device, ret);
+ 
+-    /* Initialise all rectangles to avoid resetting unused ones later. */
+-    gl_info->gl_ops.gl.p_glScissor(0, 0, 0, 0);
+-    checkGLcall("glScissor");
+-
+     TRACE("Created context %p.\n", ret);
+ 
+     return ret;
+diff --git a/dlls/wined3d/cs.c b/dlls/wined3d/cs.c
+index 221e51eb94b..517b5997905 100644
+--- a/dlls/wined3d/cs.c
++++ b/dlls/wined3d/cs.c
+@@ -34,7 +34,7 @@ enum wined3d_cs_op
+     WINED3D_CS_OP_FLUSH,
+     WINED3D_CS_OP_SET_PREDICATION,
+     WINED3D_CS_OP_SET_VIEWPORTS,
++    WINED3D_CS_OP_SET_SCISSOR_RECT,
+-    WINED3D_CS_OP_SET_SCISSOR_RECTS,
+     WINED3D_CS_OP_SET_RENDERTARGET_VIEW,
+     WINED3D_CS_OP_SET_DEPTH_STENCIL_VIEW,
+     WINED3D_CS_OP_SET_VERTEX_DECLARATION,
+@@ -145,11 +145,10 @@ struct wined3d_cs_set_viewports
+     struct wined3d_viewport viewports[1];
+ };
+ 
++struct wined3d_cs_set_scissor_rect
+-struct wined3d_cs_set_scissor_rects
+ {
+     enum wined3d_cs_op opcode;
++    RECT rect;
+-    unsigned int rect_count;
+-    RECT rects[1];
+ };
+ 
+ struct wined3d_cs_set_rendertarget_view
+@@ -546,7 +545,7 @@ void wined3d_cs_emit_clear(struct wined3d_cs *cs, DWORD rect_count, const RECT *
+     op->fb = &cs->fb;
+     SetRect(&op->draw_rect, vp->x, vp->y, vp->x + vp->width, vp->y + vp->height);
+     if (state->render_states[WINED3D_RS_SCISSORTESTENABLE])
++        IntersectRect(&op->draw_rect, &op->draw_rect, &state->scissor_rect);
+-        IntersectRect(&op->draw_rect, &op->draw_rect, &state->scissor_rects[0]);
+     op->color = *color;
+     op->depth = depth;
+     op->stencil = stencil;
+@@ -990,28 +989,21 @@ void wined3d_cs_emit_set_viewports(struct wined3d_cs *cs, unsigned int viewport_
+     cs->ops->submit(cs, WINED3D_CS_QUEUE_DEFAULT);
+ }
+ 
++static void wined3d_cs_exec_set_scissor_rect(struct wined3d_cs *cs, const void *data)
+-static void wined3d_cs_exec_set_scissor_rects(struct wined3d_cs *cs, const void *data)
+ {
++    const struct wined3d_cs_set_scissor_rect *op = data;
+-    const struct wined3d_cs_set_scissor_rects *op = data;
+ 
++    cs->state.scissor_rect = op->rect;
+-    if (op->rect_count)
+-        memcpy(cs->state.scissor_rects, op->rects, op->rect_count * sizeof(*op->rects));
+-    else
+-        SetRectEmpty(cs->state.scissor_rects);
+-    cs->state.scissor_rect_count = op->rect_count;
+     device_invalidate_state(cs->device, STATE_SCISSORRECT);
+ }
+ 
++void wined3d_cs_emit_set_scissor_rect(struct wined3d_cs *cs, const RECT *rect)
+-void wined3d_cs_emit_set_scissor_rects(struct wined3d_cs *cs, unsigned int rect_count, const RECT *rects)
+ {
++    struct wined3d_cs_set_scissor_rect *op;
+-    struct wined3d_cs_set_scissor_rects *op;
+ 
++    op = cs->ops->require_space(cs, sizeof(*op), WINED3D_CS_QUEUE_DEFAULT);
++    op->opcode = WINED3D_CS_OP_SET_SCISSOR_RECT;
++    op->rect = *rect;
+-    op = cs->ops->require_space(cs, FIELD_OFFSET(struct wined3d_cs_set_scissor_rects, rects[rect_count]),
+-            WINED3D_CS_QUEUE_DEFAULT);
+-    op->opcode = WINED3D_CS_OP_SET_SCISSOR_RECTS;
+-    if (rect_count)
+-        memcpy(op->rects, rects, rect_count * sizeof(*rects));
+-    op->rect_count = rect_count;
+ 
+     cs->ops->submit(cs, WINED3D_CS_QUEUE_DEFAULT);
+ }
+@@ -2419,7 +2411,7 @@ static void (* const wined3d_cs_op_handlers[])(struct wined3d_cs *cs, const void
+     /* WINED3D_CS_OP_FLUSH                       */ wined3d_cs_exec_flush,
+     /* WINED3D_CS_OP_SET_PREDICATION             */ wined3d_cs_exec_set_predication,
+     /* WINED3D_CS_OP_SET_VIEWPORTS               */ wined3d_cs_exec_set_viewports,
++    /* WINED3D_CS_OP_SET_SCISSOR_RECT            */ wined3d_cs_exec_set_scissor_rect,
+-    /* WINED3D_CS_OP_SET_SCISSOR_RECTS           */ wined3d_cs_exec_set_scissor_rects,
+     /* WINED3D_CS_OP_SET_RENDERTARGET_VIEW       */ wined3d_cs_exec_set_rendertarget_view,
+     /* WINED3D_CS_OP_SET_DEPTH_STENCIL_VIEW      */ wined3d_cs_exec_set_depth_stencil_view,
+     /* WINED3D_CS_OP_SET_VERTEX_DECLARATION      */ wined3d_cs_exec_set_vertex_declaration,
+diff --git a/dlls/wined3d/device.c b/dlls/wined3d/device.c
+index 8d4f4cde0e0..3af4531d4f9 100644
+--- a/dlls/wined3d/device.c
++++ b/dlls/wined3d/device.c
+@@ -413,9 +413,7 @@ void device_clear_render_targets(struct wined3d_device *device, UINT rt_count, c
+             gl_info->gl_ops.gl.p_glScissor(draw_rect->left, drawable_height - draw_rect->bottom,
+                         draw_rect->right - draw_rect->left, draw_rect->bottom - draw_rect->top);
+         }
+-        checkGLcall("glScissor");
+         gl_info->gl_ops.gl.p_glClear(clear_mask);
+-        checkGLcall("glClear");
+     }
+     else
+     {
+@@ -450,12 +448,11 @@ void device_clear_render_targets(struct wined3d_device *device, UINT rt_count, c
+                 gl_info->gl_ops.gl.p_glScissor(current_rect.left, drawable_height - current_rect.bottom,
+                           current_rect.right - current_rect.left, current_rect.bottom - current_rect.top);
+             }
+-            checkGLcall("glScissor");
+-
+             gl_info->gl_ops.gl.p_glClear(clear_mask);
+-            checkGLcall("glClear");
+         }
+     }
++    context->scissor_rect_count = WINED3D_MAX_VIEWPORTS;
++    checkGLcall("clear");
+ 
+     if (flags & WINED3DCLEAR_TARGET && target->swapchain && target->swapchain->front_buffer == target)
+         gl_info->gl_ops.gl.p_glFlush();
+@@ -2123,19 +2120,33 @@ DWORD CDECL wined3d_device_get_sampler_state(const struct wined3d_device *device
+     return device->state.sampler_states[sampler_idx][state];
+ }
+ 
+-void CDECL wined3d_device_set_scissor_rect(struct wined3d_device *device, const RECT *rect)
++void CDECL wined3d_device_set_scissor_rects(struct wined3d_device *device, unsigned int rect_count,
++        const RECT *rects)
+ {
+-    TRACE("device %p, rect %s.\n", device, wine_dbgstr_rect(rect));
++    unsigned int i;
++
++    TRACE("device %p, rect_count %u, rects %p.\n", device, rect_count, rects);
++
++    for (i = 0; i < rect_count; ++i)
++    {
++        TRACE("%u: %s\n", i, wine_dbgstr_rect(&rects[i]));
++    }
+ 
+     if (device->recording)
+         device->recording->changed.scissorRect = TRUE;
+ 
+-    if (EqualRect(&device->update_state->scissor_rect, rect))
++    if (device->update_state->scissor_rect_count == rect_count
++            && !memcmp(device->update_state->scissor_rects, rects, rect_count * sizeof(*rects)))
+     {
+-        TRACE("App is setting the old scissor rectangle over, nothing to do.\n");
++        TRACE("App is setting the old scissor rectangles over, nothing to do.\n");
+         return;
+     }
+-    CopyRect(&device->update_state->scissor_rect, rect);
++
++    if (rect_count)
++        memcpy(device->update_state->scissor_rects, rects, rect_count * sizeof(*rects));
++    else
++        memset(device->update_state->scissor_rects, 0, sizeof(device->update_state->scissor_rects));
++    device->update_state->scissor_rect_count = rect_count;
+ 
+     if (device->recording)
+     {
+@@ -2143,14 +2154,14 @@ void CDECL wined3d_device_set_scissor_rect(struct wined3d_device *device, const
+         return;
+     }
+ 
+-    wined3d_cs_emit_set_scissor_rect(device->cs, rect);
++    wined3d_cs_emit_set_scissor_rects(device->cs, rect_count, rects);
+ }
+ 
+ void CDECL wined3d_device_get_scissor_rect(const struct wined3d_device *device, RECT *rect)
+ {
+     TRACE("device %p, rect %p.\n", device, rect);
+ 
+-    *rect = device->state.scissor_rect;
++    *rect = device->state.scissor_rects[0];
+     TRACE("Returning rect %s.\n", wine_dbgstr_rect(rect));
+ }
+ 
+@@ -4476,8 +4487,9 @@ HRESULT CDECL wined3d_device_set_rendertarget_view(struct wined3d_device *device
+         state->viewport_count = 1;
+         wined3d_cs_emit_set_viewports(device->cs, 1, state->viewports);
+ 
+-        SetRect(&state->scissor_rect, 0, 0, view->width, view->height);
+-        wined3d_cs_emit_set_scissor_rect(device->cs, &state->scissor_rect);
++        SetRect(&state->scissor_rects[0], 0, 0, view->width, view->height);
++        state->scissor_rect_count = 1;
++        wined3d_cs_emit_set_scissor_rects(device->cs, 1, state->scissor_rects);
+     }
+ 
+     prev = device->fb.render_targets[view_idx];
+@@ -4986,8 +4998,9 @@ HRESULT CDECL wined3d_device_reset(struct wined3d_device *device,
+         state->viewport_count = 1;
+         wined3d_cs_emit_set_viewports(device->cs, 1, state->viewports);
+ 
+-        SetRect(&state->scissor_rect, 0, 0, view->width, view->height);
+-        wined3d_cs_emit_set_scissor_rect(device->cs, &state->scissor_rect);
++        SetRect(&state->scissor_rects[0], 0, 0, view->width, view->height);
++        state->scissor_rect_count = 1;
++        wined3d_cs_emit_set_scissor_rects(device->cs, 1, state->scissor_rects);
+     }
+ 
+     if (device->d3d_initialized)
+diff --git a/dlls/wined3d/state.c b/dlls/wined3d/state.c
+index 3563b4b0fdd..c869b63b11d 100644
+--- a/dlls/wined3d/state.c
++++ b/dlls/wined3d/state.c
+@@ -4252,27 +4252,53 @@ static void light(struct wined3d_context *context, const struct wined3d_state *s
+ static void scissorrect(struct wined3d_context *context, const struct wined3d_state *state, DWORD state_id)
+ {
+     const struct wined3d_gl_info *gl_info = context->gl_info;
+-    const RECT *r = &state->scissor_rect;
++    unsigned int height = 0;
++    const RECT *r;
+ 
+     /* Warning: glScissor uses window coordinates, not viewport coordinates,
+      * so our viewport correction does not apply. Warning2: Even in windowed
+      * mode the coords are relative to the window, not the screen. */
+-    TRACE("Setting new scissor rect to %s.\n", wine_dbgstr_rect(r));
+ 
+-    if (context->render_offscreen)
+-    {
+-        gl_info->gl_ops.gl.p_glScissor(r->left, r->top, r->right - r->left, r->bottom - r->top);
+-    }
+-    else
++    if (!context->render_offscreen)
+     {
+         const struct wined3d_rendertarget_view *target = state->fb->render_targets[0];
+-        UINT height;
+-        UINT width;
++        unsigned int width;
+ 
+         wined3d_rendertarget_view_get_drawable_size(target, context, &width, &height);
+-        gl_info->gl_ops.gl.p_glScissor(r->left, height - r->bottom, r->right - r->left, r->bottom - r->top);
+     }
+-    checkGLcall("glScissor");
++
++    if (gl_info->supported[ARB_VIEWPORT_ARRAY])
++    {
++        GLint sr[4 * WINED3D_MAX_VIEWPORTS];
++        unsigned int i, reset_count = 0;
++
++        for (i = 0; i < state->scissor_rect_count; ++i)
++        {
++            r = &state->scissor_rects[i];
++
++            sr[i * 4] = r->left;
++            sr[i * 4 + 1] = height ? height - r->top : r->top;
++            sr[i * 4 + 2] = r->right - r->left;
++            sr[i * 4 + 3] = r->bottom - r->top;
++        }
++
++        if (context->scissor_rect_count > state->scissor_rect_count)
++            reset_count = context->scissor_rect_count - state->scissor_rect_count;
++
++        if (reset_count)
++            memset(&sr[state->scissor_rect_count * 4], 0, reset_count * 4 * sizeof(GLint));
++
++        GL_EXTCALL(glScissorArrayv(0, state->scissor_rect_count + reset_count, sr));
++        checkGLcall("glScissorArrayv");
++        context->scissor_rect_count = state->scissor_rect_count;
++    }
++    else
++    {
++        r = &state->scissor_rects[0];
++        gl_info->gl_ops.gl.p_glScissor(r->left, height ? height - r->top : r->top,
++                r->right - r->left, r->bottom - r->top);
++        checkGLcall("glScissor");
++    }
+ }
+ 
+ static void indexbuffer(struct wined3d_context *context, const struct wined3d_state *state, DWORD state_id)
+diff --git a/dlls/wined3d/stateblock.c b/dlls/wined3d/stateblock.c
+index 4ad0331f94b..b4d17517b4b 100644
+--- a/dlls/wined3d/stateblock.c
++++ b/dlls/wined3d/stateblock.c
+@@ -825,12 +825,18 @@ void CDECL wined3d_stateblock_capture(struct wined3d_stateblock *stateblock)
+             memset(stateblock->state.viewports, 0, sizeof(*stateblock->state.viewports));
+     }
+ 
+-    if (stateblock->changed.scissorRect && memcmp(&src_state->scissor_rect,
+-            &stateblock->state.scissor_rect, sizeof(stateblock->state.scissor_rect)))
++    if (stateblock->changed.scissorRect
++            && (src_state->scissor_rect_count != stateblock->state.scissor_rect_count
++            || memcmp(src_state->scissor_rects, stateblock->state.scissor_rects,
++                       src_state->scissor_rect_count * sizeof(*stateblock->state.scissor_rects))))
+     {
+-        TRACE("Updating scissor rect.\n");
++        TRACE("Updating scissor rects.\n");
+ 
+-        stateblock->state.scissor_rect = src_state->scissor_rect;
++        if ((stateblock->state.scissor_rect_count = src_state->scissor_rect_count))
++            memcpy(stateblock->state.scissor_rects, src_state->scissor_rects,
++                    src_state->scissor_rect_count * sizeof(*src_state->scissor_rects));
++        else
++            SetRectEmpty(stateblock->state.scissor_rects);
+     }
+ 
+     map = stateblock->changed.streamSource;
+@@ -1065,7 +1071,8 @@ void CDECL wined3d_stateblock_apply(const struct wined3d_stateblock *stateblock)
+         wined3d_device_set_viewports(device, stateblock->state.viewport_count, stateblock->state.viewports);
+ 
+     if (stateblock->changed.scissorRect)
+-        wined3d_device_set_scissor_rect(device, &stateblock->state.scissor_rect);
++        wined3d_device_set_scissor_rects(device, stateblock->state.scissor_rect_count,
++                stateblock->state.scissor_rects);
+ 
+     map = stateblock->changed.streamSource;
+     for (i = 0; map; map >>= 1, ++i)
+diff --git a/dlls/wined3d/wined3d.spec b/dlls/wined3d/wined3d.spec
+index 1b591782969..21b2414bbef 100644
+--- a/dlls/wined3d/wined3d.spec
++++ b/dlls/wined3d/wined3d.spec
+@@ -176,7 +176,7 @@
+ @ cdecl wined3d_device_set_render_state(ptr long long)
+ @ cdecl wined3d_device_set_rendertarget_view(ptr long ptr long)
+ @ cdecl wined3d_device_set_sampler_state(ptr long long long)
+-@ cdecl wined3d_device_set_scissor_rect(ptr ptr)
++@ cdecl wined3d_device_set_scissor_rects(ptr long ptr)
+ @ cdecl wined3d_device_set_software_vertex_processing(ptr long)
+ @ cdecl wined3d_device_set_stream_output(ptr long ptr long)
+ @ cdecl wined3d_device_set_stream_source(ptr long ptr long long)
+diff --git a/dlls/wined3d/wined3d_private.h b/dlls/wined3d/wined3d_private.h
+index 8cdc3ef6f93..e9e3f86b910 100644
+--- a/dlls/wined3d/wined3d_private.h
++++ b/dlls/wined3d/wined3d_private.h
+@@ -1995,6 +1995,7 @@ struct wined3d_context
+     GLuint                  dummy_arbfp_prog;
+ 
+     unsigned int viewport_count;
++    unsigned int scissor_rect_count;
+ };
+ 
+ struct wined3d_fb_state
+@@ -2863,7 +2864,8 @@ struct wined3d_state
+     struct wined3d_material material;
+     struct wined3d_viewport viewports[WINED3D_MAX_VIEWPORTS];
+     unsigned int viewport_count;
+-    RECT scissor_rect;
++    RECT scissor_rects[WINED3D_MAX_VIEWPORTS];
++    unsigned int scissor_rect_count;
+ 
+     /* Light hashmap. Collisions are handled using linked lists. */
+ #define LIGHTMAP_SIZE 43
+@@ -3599,7 +3601,7 @@ void wined3d_cs_emit_set_sampler(struct wined3d_cs *cs, enum wined3d_shader_type
+         UINT sampler_idx, struct wined3d_sampler *sampler) DECLSPEC_HIDDEN;
+ void wined3d_cs_emit_set_sampler_state(struct wined3d_cs *cs, UINT sampler_idx,
+         enum wined3d_sampler_state state, DWORD value) DECLSPEC_HIDDEN;
+-void wined3d_cs_emit_set_scissor_rect(struct wined3d_cs *cs, const RECT *rect) DECLSPEC_HIDDEN;
++void wined3d_cs_emit_set_scissor_rects(struct wined3d_cs *cs, unsigned int rect_count, const RECT *rects) DECLSPEC_HIDDEN;
+ void wined3d_cs_emit_set_shader(struct wined3d_cs *cs, enum wined3d_shader_type type,
+         struct wined3d_shader *shader) DECLSPEC_HIDDEN;
+ void wined3d_cs_emit_set_stream_output(struct wined3d_cs *cs, UINT stream_idx,
+diff --git a/include/wine/wined3d.h b/include/wine/wined3d.h
+index ccda987405c..6223706f578 100644
+--- a/include/wine/wined3d.h
++++ b/include/wine/wined3d.h
+@@ -2426,7 +2426,8 @@ HRESULT __cdecl wined3d_device_set_rendertarget_view(struct wined3d_device *devi
+         unsigned int view_idx, struct wined3d_rendertarget_view *view, BOOL set_viewport);
+ void __cdecl wined3d_device_set_sampler_state(struct wined3d_device *device,
+         UINT sampler_idx, enum wined3d_sampler_state state, DWORD value);
+-void __cdecl wined3d_device_set_scissor_rect(struct wined3d_device *device, const RECT *rect);
++void __cdecl wined3d_device_set_scissor_rects(struct wined3d_device *device,
++        unsigned int rect_count, const RECT *rect);
+ void __cdecl wined3d_device_set_software_vertex_processing(struct wined3d_device *device, BOOL software);
+ void __cdecl wined3d_device_set_stream_output(struct wined3d_device *device, UINT idx,
+         struct wined3d_buffer *buffer, UINT offset);
+-- 
+2.11.4.GIT
