@@ -263,7 +263,7 @@ else
                 cd wine
                 git checkout 8e1451c51028eb919e5ffdbea4d7a92ea13085f0
                 cd ..
-                #patch -d wine -Np1 < "${scriptdir}"/sfc.patch
+                patch -d wine -Np1 < "${scriptdir}"/wpcap.patch
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
