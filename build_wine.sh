@@ -264,6 +264,7 @@ else
                 git checkout 409497ee8439479278f04a7c28f35013630f5b1e
                 cd ..
                 patch -d wine -Np1 < "${scriptdir}"/wpcap.patch
+                patch -d wine -Np1 < "${scriptdir}"/rets-revert.patch
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
