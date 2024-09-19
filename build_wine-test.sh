@@ -260,9 +260,9 @@ else
                 BUILD_NAME="${WINE_VERSION}"
                 #git clone https://gitlab.winehq.org/wine/wine.git wine
                 git clone -b wine-test https://github.com/on-that-tiger-mountain/wine.git wine
-                cd wine
-                git checkout 06531b1d9898ba3ac3b7c69d6192682202606f8f
-                cd ..
+                #cd wine
+                #git checkout 06531b1d9898ba3ac3b7c69d6192682202606f8f
+                #cd ..
                 #patch -d wine -Np1 < "${scriptdir}"/wpcap.patch
                 #patch -d wine -Np1 < "${scriptdir}"/rets-revert.patch
         fi
