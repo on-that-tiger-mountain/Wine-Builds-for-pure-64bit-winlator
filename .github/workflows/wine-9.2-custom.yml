@@ -25,8 +25,8 @@ jobs:
           sudo tar -C /opt -xpf /opt/Bootstraps/bootstraps.tar.xz
           chmod +x build_wine.sh
           export WINE_VERSION="9.2"
-          export EXPERIMENTAL_WOW64="false"
-          WINE_BRANCH=vanilla ./build_wine.sh
+          export EXPERIMENTAL_WOW64="true"
+          WINE_BRANCH=vanilla ./build_wine-9.2-custom.sh
           sha256sum *.tar.xz
       - uses: actions/upload-artifact@v3
         with:

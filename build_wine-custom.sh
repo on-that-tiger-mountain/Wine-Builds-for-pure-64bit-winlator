@@ -258,13 +258,13 @@ else
                 BUILD_NAME="${WINE_VERSION}-$(git -C wine rev-parse --short HEAD)"
         else
                 BUILD_NAME="${WINE_VERSION}"
-                git clone https://gitlab.winehq.org/wine/wine.git wine
-                #git clone -b wine-9.2-custom-fixmapshared https://github.com/on-that-tiger-mountain/wine-9.2-custom.git wine
-                cd wine
-                git checkout 06531b1d9898ba3ac3b7c69d6192682202606f8f
-                cd ..
-                patch -d wine -Np1 < "${scriptdir}"/wpcap.patch
-                patch -d wine -Np1 < "${scriptdir}"/rets-revert.patch
+                #git clone https://gitlab.winehq.org/wine/wine.git wine
+                git clone -b custom-wine-9.16-fix https://github.com/on-that-tiger-mountain/wine-custom.git wine
+                #cd wine
+                #git checkout 06531b1d9898ba3ac3b7c69d6192682202606f8f
+                #cd ..
+                #patch -d wine -Np1 < "${scriptdir}"/wpcap.patch
+                #patch -d wine -Np1 < "${scriptdir}"/rets-revert.patch
         fi
 
         if [ "${WINE_BRANCH}" = "staging" ]; then
