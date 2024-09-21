@@ -1,4 +1,4 @@
-name: wine-9.17-custom CI
+name: wine-9.18-custom CI
 
 on:
   schedule:
@@ -24,11 +24,11 @@ jobs:
           sudo apt install debootstrap perl git wget xz-utils bubblewrap autoconf
           sudo tar -C /opt -xpf /opt/Bootstraps/bootstraps.tar.xz
           chmod +x build_wine.sh
-          export WINE_VERSION="9.17"
-          export EXPERIMENTAL_WOW64="false"
+          export WINE_VERSION="9.18"
+          export EXPERIMENTAL_WOW64="true"
           WINE_BRANCH=vanilla ./build_wine-test.sh
           sha256sum *.tar.xz
       - uses: actions/upload-artifact@v3
         with:
-          name: wine-9.17-custom
+          name: wine-9.18-custom
           path: ./*.tar.xz
