@@ -262,7 +262,7 @@ else
                 #git clone -b wine-test https://github.com/on-that-tiger-mountain/wine.git wine
                 git clone https://github.com/on-that-tiger-mountain/wine-9.2-custom.git wine
                 cd wine
-                git checkout 5414e7bab909c8a434ae8acbdd7ecfbae241b2b3
+                git checkout 3984004095402da10f9d1fadac0ae277f90c5fc1
                 cd ..
                 #patch -d wine -Np1 < "${scriptdir}"/wpcap.patch
                 #patch -d wine -Np1 < "${scriptdir}"/rets-revert.patch
