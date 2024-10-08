@@ -1,0 +1,34 @@
+name: wine-9.2-custom-exp-2204 CI
+
+on:
+  schedule:
+    - cron:  '0 0 1 * *'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: bootstraps-2204.yml
+          workflow_conclusion: success
+          path: /opt
+      - name: Build Wine
+        run: |
+          sudo apt update
+          sudo apt install debootstrap perl git wget xz-utils bubblewrap autoconf
+          sudo tar -C /opt -xpf /opt/Bootstraps-2204/bootstraps.tar.xz
+          chmod +x build_wine.sh
+          export WINE_VERSION="9.2"
+          export EXPERIMENTAL_WOW64="true"
+          WINE_BRANCH=vanilla ./build_wine-9.2-custom-exp-2204.sh
+          sha256sum *.tar.xz
+      - uses: actions/upload-artifact@v3
+        with:
+          name: wine-9.2-custom-exp-2204
+          path: ./*.tar.xz
