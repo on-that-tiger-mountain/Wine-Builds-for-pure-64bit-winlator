@@ -1,4 +1,4 @@
-name: wine-9.2-custom CI
+name: wine-9.20-custom-exp CI
 
 on:
   schedule:
@@ -23,12 +23,12 @@ jobs:
           sudo apt update
           sudo apt install debootstrap perl git wget xz-utils bubblewrap autoconf
           sudo tar -C /opt -xpf /opt/Bootstraps/bootstraps.tar.xz
-          chmod +x build_wine-9.2-custom.sh
-          export WINE_VERSION="9.2"
+          chmod +x build_wine-test-exp.sh
+          export WINE_VERSION="9.20"
           export EXPERIMENTAL_WOW64="true"
-          WINE_BRANCH=vanilla ./build_wine-9.2-custom.sh
+          WINE_BRANCH=vanilla ./build_wine-test-exp.sh
           sha256sum *.tar.xz
       - uses: actions/upload-artifact@v3
         with:
-          name: wine-9.2-custom
+          name: wine-9.20-custom-exp
           path: ./*.tar.xz
