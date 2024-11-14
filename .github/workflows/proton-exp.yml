@@ -1,13 +1,11 @@
 name: Proton Experimental CI
 
 on:
-  schedule:
-    - cron:  '0 0 1,17 * *'
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v3

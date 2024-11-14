@@ -1,8 +1,6 @@
 name: wine-9.2-custom-exp-2204 CI
 
 on:
-  schedule:
-    - cron:  '0 0 1 * *'
   workflow_dispatch:
 
 jobs:
@@ -23,7 +21,7 @@ jobs:
           sudo apt update
           sudo apt install debootstrap perl git wget xz-utils bubblewrap autoconf
           sudo tar -C /opt -xpf /opt/Bootstraps-2204/bootstraps.tar.xz
-          chmod +x build_wine.sh
+          chmod +x build_wine-9.2-custom-exp-2204.sh
           export WINE_VERSION="9.2"
           export EXPERIMENTAL_WOW64="true"
           WINE_BRANCH=vanilla ./build_wine-9.2-custom-exp-2204.sh

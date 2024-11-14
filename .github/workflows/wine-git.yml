@@ -1,13 +1,11 @@
 name: Wine-Git CI
 
 on:
-  schedule:
-    - cron:  '0 0 */3 * *'
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v3
