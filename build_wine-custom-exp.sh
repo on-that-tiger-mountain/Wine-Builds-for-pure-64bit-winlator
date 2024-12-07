@@ -424,9 +424,10 @@ for build in ${builds_list}; do
                 fi
 
                 if [ "${EXPERIMENTAL_WOW64}" = "true" ]; then
-                        rm "${build}"/bin/wine "${build}"/bin/wine-preloader
-                        cp "${build}"/bin/wine64 "${build}"/bin/wine
-                        rm -rf "${build}"/lib/wine/i386-unix
+                        #rm "${build}"/bin/wine "${build}"/bin/wine-preloader
+                        #cp "${build}"/bin/wine64 "${build}"/bin/wine
+                        cp "${build}"/bin/wine "${build}"/bin/wine64
+                        #rm -rf "${build}"/lib/wine/i386-unix
                 fi
 
                 tar -Jcf "${build}".tar.xz "${build}"
