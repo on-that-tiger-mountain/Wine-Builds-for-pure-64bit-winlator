@@ -5,13 +5,13 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download artifact
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v3
         with:
           workflow: bootstraps.yml
           workflow_conclusion: success
@@ -24,7 +24,7 @@ jobs:
           chmod +x build_wine.sh
           WINE_BRANCH=proton PROTON_BRANCH=bleeding-edge ./build_wine.sh
           sha256sum *.tar.xz
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Proton Experimental
           path: ./*.tar.xz
