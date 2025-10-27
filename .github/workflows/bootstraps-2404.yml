@@ -1,4 +1,4 @@
-name: Bootstraps-2204 CI
+name: Bootstraps-2404 CI
 
 on:
   workflow_dispatch:
