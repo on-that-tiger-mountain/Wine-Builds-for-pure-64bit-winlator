@@ -427,7 +427,14 @@ for build in ${builds_list}; do
                 if [ "${EXPERIMENTAL_WOW64}" = "true" ]; then
                         #rm "${build}"/bin/wine "${build}"/bin/wine-preloader
                         #cp "${build}"/bin/wine64 "${build}"/bin/wine
-                        cp "${build}"/bin/wine "${build}"/bin/wine64
+                        #cp "${build}"/bin/wine "${build}"/bin/wine64
+                        #rm -rf "${build}"/lib/wine/i386-unix
+                        if [ -f "${build}"/bin/wine64 ]; then
+                                rm -f "${build}"/bin/wine "${build}"/bin/wine-preloader "${build}"/bin/wine64-preloader
+                                cp "${build}"/bin/wine64 "${build}"/bin/wine
+                        else
+                                cp "${build}"/bin/wine "${build}"/bin/wine64
+                        fi
                         rm -rf "${build}"/lib/wine/i386-unix
                 fi
 
